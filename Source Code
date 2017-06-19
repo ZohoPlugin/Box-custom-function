@@ -1,0 +1,302 @@
+    
+//Note: the custom function should have "record_id" parameter
+// getting record info from Leads or Quotes using the record_id
+ 
+    quote_info = zoho.crm.getRecordById("Quotes", quote_id.toLong());
+// Getting Box folder ID from the record info
+    box_folder_id = quote_info.get("Box Folder ID");
+   if ((box_folder_id == null) || (box_folder_id == ""))
+   {
+      rootFolderId = zoho.crm.getOrgVariable("box.box_rootfolder_id");
+       if (rootFolderId == "")
+        {
+// Returning since the root folder ID is empty
+            return;
+        }
+       tokenObj = map();
+       tokenObj.put("folder_name", "Quotes");
+       tokenObj.put("parent", rootFolderId);
+// Using the token object and Box connector to call the invoke connector from CRM API
+       createFlrResp = zoho.crm.invokeConnector("box.box.createboxfolder", tokenObj, true);
+        if (createFlrResp == null){
+return;
+}
+// Get the status code from the createFlrResp
+        status_code = createFlrResp.get("status_code");
+        quote_folder_id = "";
+        resp_obj = createFlrResp.get("response");
+// Checking for same folder name
+        if (status_code == "409")
+       {
+            context_info = resp_obj.getJSON("context_info");
+            conflict_ids = context_info.getJSON("conflicts").toJSONList();
+            for each entry in conflict_ids
+            {
+                quote_folder_id = entry.getJSON("id");
+            }
+       }
+// Returns the folder ID if these conditions satisfy
+        else if ((status_code == "201") || (status_code == "200"))
+        {
+            quote_folder_id = resp_obj.getJSON("id");
+        }
+           if (quote_folder_id == "")
+        {
+            return;
+        }
+//Get the record name if folder ID exists
+        first_name = quote_info.get("Subject");
+tokenObj1 = map();
+tokenObj1.put("folder_name", first_name);
+tokenObj1.put("parent", quote_folder_id);
+ 
+// Update the folder id and record name using API
+ 
+createFlrResp1 = zoho.crm.invokeConnector("box.box.createboxfolder", tokenObj1, true);
+status_code1 = createFlrResp1.get("status_code");
+resp_obj1 = createFlrResp1.get("response");
+rec_folder_id = "";
+if (status_code1 == "409")
+{
+            context_info1 = resp_obj1.getJSON("context_info");
+            conflict_ids1 = context_info1.getJSON("conflicts").toJSONList();
+            for each entry1 in conflict_ids1
+            {
+                rec_folder_id = entry1.getJSON("id");
+            }
+         }
+        else if ((status_code1 == "201") || (status_code1 == "200"))
+        {
+            rec_folder_id = resp_obj1.getJSON("id");
+        }
+        if (rec_folder_id != "")
+{
+            updateMap = map();
+            updateMap.put("Box Folder ID", rec_folder_id);
+// Update the Box folder ID using the CRM API
+            update_resp = zoho.crm.updateRecord("Quotes", quote_id + "", updateMap);
+}
+return;
+}
+                                                               
+ 
+ 
+ 
+Related List For Quotes Module :
+ 
+// Note: the custom function should have "record_id" parameter
+// Getting record info from Leads or Quotes using the record_id
+quote_info = zoho.crm.getRecordById("Quotes", quote_id.toLong());
+box_folder_id = quote_info.get("Box Folder ID");
+ 
+// satisfies the below conditions if folder id is empty
+if ((box_folder_id == null) || (box_folder_id == ""))
+{
+rootFolderId = zoho.crm.getOrgVariable("box.box_rootfolder_id");
+if ((rootFolderId == "") || (rootFolderId == "none"))
+{
+xmlList = ("<error><message>Folder for Zoho CRM is not created yet in Box. If you are an administrator, please go to Box Settings tab and create a Root Folder. And, if you are not an adminstrator please contact your administrator.</message></error>");
+return xmlList;
+}
+// Creates the folder name as module name under the root folder if folder id exists
+tokenObj = map();
+tokenObj.put("folder_name", "Quotes");
+tokenObj.put("parent", rootFolderId);
+createFlrResp = zoho.crm.invokeConnector("box.box.createboxfolder", tokenObj, true);
+if (createFlrResp == null)
+{
+xmlList = "<error><message>Please authorize Box to view Box Files. You can authorize Box in Box Settings tab.</message></error>";
+return xmlList;
+}
+status_code = createFlrResp.get("status_code");
+quote_folder_id = "";
+resp_obj = createFlrResp.get("response");
+//Satisfies the below condition when the folder name comes same
+if (status_code == "409")
+{
+context_info = resp_obj.getJSON("context_info");
+conflict_ids = context_info.getJSON("conflicts").toJSONList();
+for each entry in conflict_ids
+{
+quote_folder_id = entry.getJSON("id");
+}
+}
+else if ((status_code == "201") || (status_code == "200"))
+{
+quote_folder_id = resp_obj.getJSON("id");
+}
+if (quote_folder_id == "")
+{
+xmlList = ("<error><message>No files exists for this record.</message></error>");
+return xmlList;
+}
+//get the record name and folder id from quote_info
+first_name = quote_info.get("Subject");
+tokenObj1 = map();
+tokenObj1.put("folder_name", first_name);
+tokenObj1.put("parent", quote_folder_id);
+createFlrResp1 = zoho.crm.invokeConnector("box.box.createboxfolder", tokenObj1, true);
+status_code1 = createFlrResp1.get("status_code");
+resp_obj1 = createFlrResp1.get("response");
+rec_folder_id = "";
+if (status_code1 == "409")
+{
+context_info1 = resp_obj1.getJSON("context_info");
+conflict_ids1 = context_info1.getJSON("conflicts").toJSONList();
+for each entry1 in conflict_ids1
+{
+rec_folder_id = entry1.getJSON("id");
+}
+}
+else if ((status_code1 == "201") || (status_code1 == "200"))
+{
+rec_folder_id = resp_obj1.getJSON("id");
+}
+//Update the folder id using the crm API
+if (rec_folder_id != "")
+{
+updateMap = map();
+updateMap.put("Box Folder ID", rec_folder_id);
+update_resp = zoho.crm.updateRecord("Quotes", quote_id + "", updateMap);
+}
+xmlList = ("<error><message>No files exists for this record.</message></error>");
+return xmlList;
+}
+else
+{
+tokenMap = map();
+tokenMap.put("FOLDER_ID", box_folder_id);
+tokenMap.put("limit", 100);
+tokenMap.put("offset", 0);
+//get the folder items created under the root folder using the token object
+folder_items_map = zoho.crm.invokeConnector(("box.box.getfolderitems"), tokenMap, true);
+folder_items_status = folder_items_map.get("status_code");
+if (folder_items_status == "200")
+{
+listfolder_resp = folder_items_map.get("response");
+entries = listfolder_resp.getJSON("entries");
+entries_list = entries.toJSONList();
+if ((entries_list.toString() == null) || (entries_list.size() == 0))
+{
+xmlList = ("<error><message>No files exists for this record.</message></error>");
+return xmlList;
+}
+//Get the json object items from the entries list
+else
+{
+i = 0;
+recordsXmlStr = "<record>";
+for each entry in entries_list
+{
+type = entry.getJSON("type");
+name = entry.getJSON("name");
+id = entry.getJSON("id");
+description = "";
+if (toString(entry).indexOf("description") > 0)
+{
+description = entry.getJSON("description");
+}
+if ((description == null) || (description == ""))
+{
+description = "--";
+}
+size = "";
+if (toString(entry).indexOf(("size")) > 0)
+{
+size = entry.getJSON(("size"));
+}
+if (((size == null) || (size == "null")) || (size == ""))
+{
+size = "0";
+}
+content_modified_at = "";
+if (toString(entry).indexOf("content_modified_at") > 0)
+{
+content_modified_at = entry.getJSON("content_modified_at");
+}
+if (content_modified_at == null)
+{
+content_modified_at = "";
+}
+modified_by = "";
+if (toString(entry).indexOf("modified_by") > 0)
+{
+modified_by = entry.getJSON("modified_by").getJSON("name");
+}
+if (((modified_by == null) || (modified_by == "")) || (modified_by == "null"))
+{
+modified_by = "--";
+}
+shared_link = "";
+if (toString(entry).indexOf("shared_link") > 0)
+{
+shared_link = entry.getJSON("shared_link");
+}
+shared_link_url = "--";
+if (((shared_link == null) || (shared_link == "null")) || (shared_link == ""))
+{
+shared_link_url = "--";
+}
+else
+{
+shared_link_url = shared_link.getJSON("url");
+}
+link = "https://app.box.com/files/0/f/" + box_folder_id + "/1/f_" + id;
+if (type == "folder")
+{
+link = "https://app.box.com/files/0/f/" + id + "/";
+type = "Folder";
+}
+else
+{
+type = "File";
+}
+if (content_modified_at != "")
+{
+content_modified_at = content_modified_at.replaceAll("T"," ");
+}
+size_str = "-";
+size_str = ((((size).toDecimal() / 1024))) + "";
+if (size_str.indexOf(".") > 0)
+{
+pos = (size_str.indexOf(".") + 3);
+if (pos > size_str.length())
+{
+pos = size_str.length();
+}
+size_str = size_str.subString(0,pos);
+}
+size_str = (size_str) + " KB";
+//Construct the xml using the above responses
+recordsXmlStr = recordsXmlStr + "<row no='" + i + "'>";
+recordsXmlStr = recordsXmlStr + "<FL val='Name' link='true' url='" + link + "'><![CDATA[" + name + "]]></FL>";
+recordsXmlStr = recordsXmlStr + "<FL val='Type'>" + type + "</FL>";
+recordsXmlStr = recordsXmlStr + "<FL val='Description'>" + description + "</FL>";
+recordsXmlStr = (recordsXmlStr + "<FL val='Size'>" + size_str) + "</FL>";
+recordsXmlStr = recordsXmlStr + "<FL val='Modified at'>" + content_modified_at + "</FL>";
+recordsXmlStr = recordsXmlStr + "<FL val='Modified by'><![CDATA[" + modified_by + "]]></FL>";
+if (shared_link_url == "--")
+{
+recordsXmlStr = recordsXmlStr + "<FL val='Shared Link'>--</FL>";
+}
+else
+{
+recordsXmlStr = recordsXmlStr + "<FL val='Shared Link' link='true' url='" + shared_link_url + "'>Shared Link</FL>";
+}
+recordsXmlStr = recordsXmlStr + "</row>";
+}
+recordsXmlStr = recordsXmlStr + "</record>";
+return recordsXmlStr;
+}
+}
+else if ((folder_items_status == "401") || (folder_items_status == "404"))
+{
+xmlList = ("<error><message>You need to be invited to the Box root folder. Please contact your administrator to get access to content already linked to this record.</message></error>");
+return xmlList;
+}
+else
+{
+xmlList = ("<error><message>Unable to get files related to this record from Box.</message></error>");
+return xmlList;
+}
+}
