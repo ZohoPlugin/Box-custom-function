@@ -4,19 +4,19 @@ The Box extension for Zoho CRM is one convenient way to access stored data and s
  
 To associate the above custom function to a workflow rule:
  
-Click Settings > Setup > Automation > Workflow Rules.
-In the Workflow Rules page, click the Create Rule button.
-In the Create New Rule tab, specify workflow rule parameters that you require.
-Execute the workflow during Record Actions. Select Create or Edit and click Next.
-Select All Records in the following options.
-Next, select Custom Function to be triggered under an Instant Action.
-Associate the custom call function to be triggered.
-Click Save.
+1. Click Settings > Setup > Automation > Workflow Rules.
+2. In the Workflow Rules page, click the Create Rule button.
+3. In the Create New Rule tab, specify workflow rule parameters that you require.
+4. Execute the workflow during Record Actions. Select Create or Edit and click Next.
+5. Select All Records in the following options.
+6. Next, select Custom Function to be triggered under an Instant Action.
+7. Associate the custom call function to be triggered.
+8. Click Save.
 
 To create custom buttons :
- 
-Click the Settings > Setup > Customization > Modules.
-Clic  $Module of your choice$ > Layout.
-Drag and drop the Fields from the New Fields tab.
-Click Save.
+
+1. Click the Settings > Setup > Customization > Modules.
+2. Click the $Module of your choice$ > Layout.
+3. Drag and drop the Fields from the New Fields tab.
+4. Click Save.
 
